@@ -35,7 +35,7 @@ ChartJS.register(
   ArcElement
 );
 
-const MetricBeatDashboard = () => {
+const MetricFlowDashboard = () => {
   const { connectionStatus, cpuHistory, memoryHistory, timeLabels } =
     useSocket();
   const { systemMetrics, endpointStats, loading, error } = useMetrics();
@@ -110,7 +110,7 @@ const MetricBeatDashboard = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-5xl font-light mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Metric Beat
+            Metric Flow
           </h1>
           <p className="text-xl text-gray-600 font-light">
             Real-time System Monitoring Dashboard
@@ -181,4 +181,4 @@ const MetricBeatDashboard = () => {
   );
 };
 
-export default MetricBeatDashboard;
+export default MetricFlowDashboard;
