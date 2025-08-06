@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-
 const dummyRoutes = require('./dummyRoutes');
 
 router.get('/', (req, res) => {

@@ -26,7 +26,7 @@ router.get('/metrics', (req, res) => {
 
 router.get('/disk', async (req, res) => {
   try {
-    const disk = await checkDiskSpace('/');
+    const disk = await checkDiskSpace('C:');
     const totalMb = disk.size / (1024 * 1024);
     const freeMb = disk.free / (1024 * 1024);
     const usedMb = totalMb - freeMb;

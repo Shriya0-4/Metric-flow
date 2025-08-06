@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const dotenv = require('dotenv').config();
-const connectDB = require('./db');
 const socketSetup = require('./socket');
 
 const systemRoutes = require('./routes/systemRoutes');
@@ -30,7 +29,7 @@ app.use(cors({
 app.use(express.json());
 
 
-connectDB();
+
 
 app.use('/api/system', systemRoutes);
 app.use('/api/dummy', dummyRoutes);
