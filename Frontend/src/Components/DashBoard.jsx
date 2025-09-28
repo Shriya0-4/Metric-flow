@@ -24,6 +24,7 @@ import {
   doughnutChartOptions,
 } from "../Utils/ChartConfig";
 import { CHART_CONFIG, API_CONFIG } from "../Constants/constant";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -41,21 +42,59 @@ const MetricFlowDashboard = () => {
   const { systemMetrics, endpointStats, loading, error } = useMetrics();
 
   useEffect(() => {
+    let isMounted = true;
+
     const intervalId = setInterval(() => {
+      if (!isMounted) return;
+
       fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DUMMY_GET}`)
         .then((res) => res.text())
         .then(console.log)
-        .catch(console.error);
+        .catch((err) => console.warn("Dummy GET failed:", err));
+
       fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DUMMY_POST}`, {
         method: "POST",
       })
         .then((res) => res.text())
         .then(console.log)
-        .catch(console.error);
+        .catch((err) => console.warn("Dummy POST failed:", err));
     }, 5000);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, []);
+
+  const safeTimeLabels = timeLabels.length ? timeLabels : ["00:00"];
+  const safeCpuHistory = cpuHistory.length ? cpuHistory : [0];
+  const safeMemoryHistory = memoryHistory.length ? memoryHistory : [0];
+
+  const cpuChartData = createLineChartData(
+    safeTimeLabels,
+    safeCpuHistory,
+    "CPU Usage (%)",
+    CHART_CONFIG.COLORS.CPU
+  );
+
+  const memoryChartData = createLineChartData(
+    safeTimeLabels,
+    safeMemoryHistory,
+    "Memory Usage (MB)",
+    CHART_CONFIG.COLORS.MEMORY
+  );
+
+  const memoryDoughnutData = createDoughnutChartData(
+    systemMetrics.memory.usedMb || 0,
+    systemMetrics.memory.freeMb || 0,
+    [CHART_CONFIG.COLORS.MEMORY_USED, CHART_CONFIG.COLORS.MEMORY_FREE]
+  );
+
+  const diskDoughnutData = createDoughnutChartData(
+    systemMetrics.diskSpace.usedMb || 0,
+    systemMetrics.diskSpace.freeMb || 0,
+    [CHART_CONFIG.COLORS.DISK_USED, CHART_CONFIG.COLORS.DISK_FREE]
+  );
 
   if (loading) {
     return (
@@ -79,34 +118,8 @@ const MetricFlowDashboard = () => {
     );
   }
 
-  const cpuChartData = createLineChartData(
-    timeLabels,
-    cpuHistory,
-    "CPU Usage (%)",
-    CHART_CONFIG.COLORS.CPU
-  );
-
-  const memoryChartData = createLineChartData(
-    timeLabels,
-    memoryHistory,
-    "Memory Usage (MB)",
-    CHART_CONFIG.COLORS.MEMORY
-  );
-
-  const memoryDoughnutData = createDoughnutChartData(
-    systemMetrics.memory.usedMb,
-    systemMetrics.memory.freeMb,
-    [CHART_CONFIG.COLORS.MEMORY_USED, CHART_CONFIG.COLORS.MEMORY_FREE]
-  );
-
-  const diskDoughnutData = createDoughnutChartData(
-    systemMetrics.diskSpace.usedMb,
-    systemMetrics.diskSpace.freeMb,
-    [CHART_CONFIG.COLORS.DISK_USED, CHART_CONFIG.COLORS.DISK_FREE]
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-5xl font-light mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -126,31 +139,32 @@ const MetricFlowDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           <MetricCard
             title="CPU Usage"
-            value={`${systemMetrics.cpuUsagePercent}%`}
-            percentage={systemMetrics.cpuUsagePercent}
+            value={`${systemMetrics.cpuUsagePercent || 0}%`}
+            percentage={systemMetrics.cpuUsagePercent || 0}
             color="blue"
           />
-
           <MetricCard
             title="Memory Usage"
-            value={`${systemMetrics.memory.usedPercent}%`}
-            percentage={systemMetrics.memory.usedPercent}
-            subtitle={`${(systemMetrics.memory.usedMb / 1024).toFixed(
+            value={`${systemMetrics.memory.usedPercent || 0}%`}
+            percentage={systemMetrics.memory.usedPercent || 0}
+            subtitle={`${((systemMetrics.memory.usedMb || 0) / 1024).toFixed(
               1
-            )} GB / ${(systemMetrics.memory.totalMb / 1024).toFixed(1)} GB`}
+            )} GB / ${((systemMetrics.memory.totalMb || 0) / 1024).toFixed(
+              1
+            )} GB`}
             color="green"
           />
-
           <MetricCard
             title="Disk Usage"
-            value={`${systemMetrics.diskSpace.usedPercent}%`}
-            percentage={systemMetrics.diskSpace.usedPercent}
-            subtitle={`${(systemMetrics.diskSpace.usedMb / 1024).toFixed(
+            value={`${systemMetrics.diskSpace.usedPercent || 0}%`}
+            percentage={systemMetrics.diskSpace.usedPercent || 0}
+            subtitle={`${((systemMetrics.diskSpace.usedMb || 0) / 1024).toFixed(
               1
-            )} GB / ${(systemMetrics.diskSpace.totalMb / 1024).toFixed(1)} GB`}
+            )} GB / ${((systemMetrics.diskSpace.totalMb || 0) / 1024).toFixed(
+              1
+            )} GB`}
             color="yellow"
           />
-
           <EndpointStats endpointStats={endpointStats} />
         </div>
 
@@ -158,7 +172,6 @@ const MetricFlowDashboard = () => {
           <ChartCard title="CPU Usage History" color="blue">
             <Line data={cpuChartData} options={lineChartOptions} />
           </ChartCard>
-
           <ChartCard title="Memory Usage History" color="green">
             <Line data={memoryChartData} options={lineChartOptions} />
           </ChartCard>
@@ -171,7 +184,6 @@ const MetricFlowDashboard = () => {
               options={doughnutChartOptions}
             />
           </ChartCard>
-
           <ChartCard title="Disk Distribution" color="indigo">
             <Doughnut data={diskDoughnutData} options={doughnutChartOptions} />
           </ChartCard>

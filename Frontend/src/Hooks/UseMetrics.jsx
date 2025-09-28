@@ -13,70 +13,50 @@ export const useMetrics = () => {
 
   const [endpointStats, setEndpointStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const fetchSystemMetrics = async () => {
-    try {
-      const data = await ApiService.fetchSystemMetrics();
-      setSystemMetrics((prev) => ({ ...prev, ...data }));
-      setError(null);
-    } catch (error) {
-      setError("Failed to fetch system metrics", error);
-    }
-  };
+  const fetchAllMetrics = async () => {
+    const [sysData, diskData, statsData] = await Promise.all([
+      ApiService.fetchSystemMetrics(),
+      ApiService.fetchDiskSpace(),
+      ApiService.fetchEndpointStats(),
+    ]);
 
-  const fetchDiskSpace = async () => {
-    try {
-      const data = await ApiService.fetchDiskSpace();
-      setSystemMetrics((prev) => ({ ...prev, ...data }));
-    } catch {
-      setError("Failed to fetch disk space");
-    }
-  };
-
-  const fetchEndpointStats = async () => {
-    try {
-      const data = await ApiService.fetchEndpointStats();
-      setEndpointStats(data);
-    } catch (error) {
-      setError("Failed to fetch endpoint stats", error);
-    }
+    if (sysData) setSystemMetrics((prev) => ({ ...prev, ...sysData }));
+    if (diskData) setSystemMetrics((prev) => ({ ...prev, ...diskData }));
+    if (statsData) setEndpointStats(statsData);
   };
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-      await Promise.all([
-        fetchSystemMetrics(),
-        fetchDiskSpace(),
-        fetchEndpointStats(),
-      ]);
-      setLoading(false);
-    };
+    fetchAllMetrics().finally(() => setLoading(false));
 
-    fetchInitialData();
+    const intervals = [
+      setInterval(
+        () =>
+          ApiService.fetchSystemMetrics().then((data) => {
+            if (data) setSystemMetrics((prev) => ({ ...prev, ...data }));
+          }),
+        API_CONFIG.INTERVALS.METRICS
+      ),
 
-    const metricsInterval = setInterval(
-      fetchSystemMetrics,
-      API_CONFIG.INTERVALS.METRICS
-    );
-    const diskInterval = setInterval(fetchDiskSpace, API_CONFIG.INTERVALS.DISK);
-    const endpointInterval = setInterval(
-      fetchEndpointStats,
-      API_CONFIG.INTERVALS.ENDPOINT_STATS
-    );
+      setInterval(
+        () =>
+          ApiService.fetchDiskSpace().then((data) => {
+            if (data) setSystemMetrics((prev) => ({ ...prev, ...data }));
+          }),
+        API_CONFIG.INTERVALS.DISK
+      ),
 
-    return () => {
-      clearInterval(metricsInterval);
-      clearInterval(diskInterval);
-      clearInterval(endpointInterval);
-    };
+      setInterval(
+        () =>
+          ApiService.fetchEndpointStats().then((data) => {
+            if (data) setEndpointStats(data);
+          }),
+        API_CONFIG.INTERVALS.ENDPOINT_STATS
+      ),
+    ];
+
+    return () => intervals.forEach(clearInterval);
   }, []);
 
-  return {
-    systemMetrics,
-    endpointStats,
-    loading,
-    error,
-  };
+  return { systemMetrics, endpointStats, loading };
 };

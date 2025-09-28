@@ -3,7 +3,7 @@ import MetricBeatDashboard from "./Components/DashBoard";
 function App() {
   return (
     <>
-      <MetricFlowDashboard />
+     <MetricBeatDashboard/>
     </>
   );
 }

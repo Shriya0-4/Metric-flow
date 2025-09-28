@@ -1,22 +1,41 @@
-export const createLineChartData = (labels, data, label, color) => ({
-  labels,
-  datasets: [
-    {
-      label,
-      data,
-      borderColor: color,
-      backgroundColor: `${color}20`,
-      borderWidth: 2,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      pointBackgroundColor: color,
-      pointBorderColor: "#ffffff",
-      pointBorderWidth: 2,
-    },
-  ],
-});
+export const createLineChartData = (labels, data, label, color) => {
+  // Clean and validate data
+  const cleanData = data.map((value) => {
+    const num = parseFloat(value);
+    return isNaN(num) ? 0 : num;
+  });
+
+  // Debug logging
+  console.log(`Chart data for ${label}:`, {
+    labels: labels,
+    data: cleanData,
+    min: Math.min(...cleanData),
+    max: Math.max(...cleanData),
+    avg: cleanData.reduce((a, b) => a + b, 0) / cleanData.length,
+  });
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        label,
+        data: cleanData,
+        borderColor: color,
+        backgroundColor: color,
+        borderWidth: 3,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+        pointHoverRadius: 6,
+        pointBackgroundColor: color,
+        pointBorderColor: "#ffffff",
+        pointBorderWidth: 2,
+        pointHoverBorderWidth: 3,
+        spanGaps: false,
+      },
+    ],
+  };
+};
 
 export const createDoughnutChartData = (usedValue, freeValue, colors) => ({
   labels: ["Used", "Free"],
@@ -34,6 +53,10 @@ export const createDoughnutChartData = (usedValue, freeValue, colors) => ({
 export const lineChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  interaction: {
+    intersect: false,
+    mode: "index",
+  },
   plugins: {
     legend: {
       labels: {
@@ -58,9 +81,11 @@ export const lineChartOptions = {
   },
   scales: {
     x: {
+      type: "category",
       ticks: {
         color: "#6b7280",
         font: { size: 11 },
+        maxTicksLimit: 10,
       },
       grid: {
         color: "rgba(156, 163, 175, 0.2)",
@@ -71,9 +96,15 @@ export const lineChartOptions = {
       },
     },
     y: {
+      type: "linear",
+      beginAtZero: true,
+      min: 0,
       ticks: {
         color: "#6b7280",
         font: { size: 11 },
+        callback: function (value) {
+          return value + "%";
+        },
       },
       grid: {
         color: "rgba(156, 163, 175, 0.2)",
@@ -87,6 +118,11 @@ export const lineChartOptions = {
   elements: {
     point: {
       hoverRadius: 6,
+      radius: 3,
+    },
+    line: {
+      borderWidth: 2,
+      tension: 0.4,
     },
   },
 };
@@ -137,14 +173,12 @@ export const chartOptions = {
   scales: {
     y: {
       beginAtZero: true,
-      grid: {
-        color: "rgba(0,0,0,0.1)",
-      },
+      min: 0,
+      max: 100,
+      ticks: { color: "#6b7280" },
     },
     x: {
-      grid: {
-        display: false,
-      },
+      ticks: { color: "#6b7280" },
     },
   },
 };

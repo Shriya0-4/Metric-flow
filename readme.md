@@ -1,6 +1,6 @@
-📘 MetricBeat – Real-time System Monitoring Dashboard
+📘 MetricFlow– Real-time System Monitoring Dashboard
 
-MetricBeat is a full-stack project that shows real-time data about your system like CPU usage, memory usage, disk space, and how often certain API endpoints are being hit.It's great for learning how real-time dashboards work and how to connect frontend + backend using WebSockets and REST APIs.
+MetricFlow is a full-stack project that shows real-time data about your system like CPU usage, memory usage, disk space, and how often certain API endpoints are being hit.It's great for learning how real-time dashboards work and how to connect frontend + backend using WebSockets and REST APIs.
 
 🚀 What This Project Does
 

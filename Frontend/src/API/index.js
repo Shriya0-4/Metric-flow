@@ -9,8 +9,8 @@ class ApiService {
       if (!response.ok) throw new Error("Failed to fetch system metrics");
       return await response.json();
     } catch (error) {
-      console.error("Error fetching system metrics:", error);
-      throw error;
+      console.warn("Error fetching system metrics:", error);
+      return null;
     }
   }
 
@@ -22,8 +22,8 @@ class ApiService {
       if (!response.ok) throw new Error("Failed to fetch disk space");
       return await response.json();
     } catch (error) {
-      console.error("Error fetching disk space:", error);
-      throw error;
+      console.warn("Error fetching disk space:", error);
+      return null;
     }
   }
 
@@ -36,8 +36,8 @@ class ApiService {
       const data = await response.json();
       return data.endpointStats || {};
     } catch (error) {
-      console.error("Error fetching endpoint stats:", error);
-      throw error;
+      console.warn("Error fetching endpoint stats:", error);
+      return {};
     }
   }
 }

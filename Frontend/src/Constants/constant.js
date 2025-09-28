@@ -3,14 +3,14 @@ export const API_CONFIG = {
   ENDPOINTS: {
     SYSTEM_METRICS: "/api/system/metrics",
     DISK_SPACE: "/api/system/disk",
-    ENDPOINT_STATS: "/api/metrics",
+    ENDPOINT_STATS: "/api/dummy/stats",
     DUMMY_GET: "/api/dummy/dummy1",
     DUMMY_POST: "/api/dummy/dummy2",
   },
   INTERVALS: {
     METRICS: 3000,
     DISK: 10000,
-    ENDPOINT_STATS: 3000,
+    ENDPOINT_STATS: 5000,
   },
 };
 
